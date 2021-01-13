@@ -34,4 +34,4 @@ schema.set('toJSON', {
     }
 });
 
-module.exports = mongoose.model('Account', schema);
+module.exports = mongoose.model('Warden', schema);
