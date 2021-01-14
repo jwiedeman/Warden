@@ -26,25 +26,55 @@ module.exports = {
 
     
 
+// CRUD
 async function createItem(params, origin) {
     // validate
     console.log('createItem')
+    // validate
     if (await db.Warden.findOne({ name: params.name })) {
-        console.log('item already found')
-        // send already registered error in email to prevent account enumeration
-        return await sendAlreadyRegisteredEmail(params.name, origin);
+        throw 'Item "' + params.name + '" is already added to the DB';
     }
-
-    // create account object
     const account = new db.Warden(params);
 
-    
     // save account
     await account.save();
 
-    // send email
-    await sendVerificationEmail(account, origin);
+    return basicDetails(account);
 }
+
+async function getAll() {
+    const accounts = await db.Account.find();
+    return accounts.map(x => basicDetails(x));
+}
+
+async function update(id, params) {
+    const account = await getDbItemById(id);
+
+    // validate (if email was changed)
+    if (params.email && account.email !== params.email && await db.Account.findOne({ email: params.email })) {
+        throw 'Email "' + params.email + '" is already taken';
+    }
+
+    // hash password if it was entered
+    if (params.password) {
+        params.passwordHash = hash(params.password);
+    }
+
+    // copy params to account and save
+    Object.assign(account, params);
+    account.updated = Date.now();
+    await account.save();
+
+    return basicDetails(account);
+}
+
+
+async function _delete(id) {
+    const account = await getDbItemById(id);
+    await account.remove();
+}
+
+
 
 
 
@@ -105,7 +135,7 @@ async function getAll() {
 }
 
 async function getById(id) {
-    const account = await getAccount(id);
+    const account = await getDbItemById(id);
     return basicDetails(account);
 }
 
@@ -128,7 +158,7 @@ async function create(params) {
 }
 
 async function update(id, params) {
-    const account = await getAccount(id);
+    const account = await getDbItemById(id);
 
     // validate (if email was changed)
     if (params.email && account.email !== params.email && await db.Account.findOne({ email: params.email })) {
@@ -149,13 +179,13 @@ async function update(id, params) {
 }
 
 async function _delete(id) {
-    const account = await getAccount(id);
+    const account = await getDbItemById(id);
     await account.remove();
 }
 
 // helper functions
 
-async function getAccount(id) {
+async function getDbItemById(id) {
     if (!db.isValidId(id)) throw 'Account not found';
     const account = await db.Account.findById(id);
     if (!account) throw 'Account not found';

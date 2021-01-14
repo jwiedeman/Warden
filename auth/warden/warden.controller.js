@@ -45,7 +45,7 @@ function createInventory(req, res, next) {
     wardenService.createItem(req.body, req.get('origin'))
         .then(() => res.json({ message: 'Registration successful, please check your email for verification instructions' }))
         .catch(next);
-        console.log('createInventory')
+        console.log('createInventory2')
 }
 
 
