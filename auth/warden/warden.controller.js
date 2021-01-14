@@ -10,7 +10,7 @@ const wardenService = require('./warden.service');
 router.post('/authenticate', authenticateSchema, authenticate);
 router.post('/refresh-token', refreshToken);
 router.post('/revoke-token', authorize(), revokeTokenSchema, revokeToken);
-router.post('/register', registerSchema, register);
+router.post('/createInventory', inventorySchema, createInventory);
 router.post('/verify-email', verifyEmailSchema, verifyEmail);
 router.post('/forgot-password', forgotPasswordSchema, forgotPassword);
 router.post('/validate-reset-token', validateResetTokenSchema, validateResetToken);
@@ -33,12 +33,7 @@ router.delete('/:id', authorize(), _delete);
 
 function inventorySchema(req, res, next) {
     const schema = Joi.object({
-        title: Joi.string().required(),
-        firstName: Joi.string().required(),
-        lastName: Joi.string().required(),
-        email: Joi.string().email().required(),
-        password: Joi.string().min(6).required(),
-        confirmPassword: Joi.string().valid(Joi.ref('password')).required(),
+        name: Joi.string().required(),
         acceptTerms: Joi.boolean().valid(true).required()
     });
     validateRequest(req, next, schema);
@@ -46,7 +41,8 @@ function inventorySchema(req, res, next) {
 }
 
 function createInventory(req, res, next) {
-    accountService.register(req.body, req.get('origin'))
+    console.log('createinventory')
+    wardenService.createItem(req.body, req.get('origin'))
         .then(() => res.json({ message: 'Registration successful, please check your email for verification instructions' }))
         .catch(next);
         console.log('createInventory')
