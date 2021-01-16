@@ -42,27 +42,15 @@ async function createItem(params, origin) {
     return basicDetails(account);
 }
 
-async function getAll() {
-    const accounts = await db.Account.find();
-    return accounts.map(x => basicDetails(x));
-}
+
 
 async function update(id, params) {
     const account = await getDbItemById(id);
-
-    // validate (if email was changed)
-    if (params.email && account.email !== params.email && await db.Account.findOne({ email: params.email })) {
-        throw 'Email "' + params.email + '" is already taken';
-    }
-
-    // hash password if it was entered
-    if (params.password) {
-        params.passwordHash = hash(params.password);
-    }
-
+   
+    
     // copy params to account and save
     Object.assign(account, params);
-    account.updated = Date.now();
+    
     await account.save();
 
     return basicDetails(account);
@@ -79,7 +67,7 @@ async function _delete(id) {
 
 
 async function verifyEmail({ token }) {
-    const account = await db.Account.findOne({ verificationToken: token });
+    const account = await db.Warden.findOne({ verificationToken: token });
 
     if (!account) throw 'Verification failed';
 
@@ -89,7 +77,7 @@ async function verifyEmail({ token }) {
 }
 
 async function forgotPassword({ email }, origin) {
-    const account = await db.Account.findOne({ email });
+    const account = await db.Warden.findOne({ email });
 
     // always return ok response to prevent email enumeration
     if (!account) return;
@@ -106,7 +94,7 @@ async function forgotPassword({ email }, origin) {
 }
 
 async function validateResetToken({ token }) {
-    const account = await db.Account.findOne({
+    const account = await db.Warden.findOne({
         'resetToken.token': token,
         'resetToken.expires': { $gt: Date.now() }
     });
@@ -115,7 +103,7 @@ async function validateResetToken({ token }) {
 }
 
 async function resetPassword({ token, password }) {
-    const account = await db.Account.findOne({
+    const account = await db.Warden.findOne({
         'resetToken.token': token,
         'resetToken.expires': { $gt: Date.now() }
     });
@@ -130,7 +118,7 @@ async function resetPassword({ token, password }) {
 }
 
 async function getAll() {
-    const accounts = await db.Account.find();
+    const accounts = await db.Warden.find();
     return accounts.map(x => basicDetails(x));
 }
 
@@ -141,11 +129,11 @@ async function getById(id) {
 
 async function create(params) {
     // validate
-    if (await db.Account.findOne({ email: params.email })) {
+    if (await db.Warden.findOne({ email: params.email })) {
         throw 'Email "' + params.email + '" is already registered';
     }
 
-    const account = new db.Account(params);
+    const account = new db.Warden(params);
     account.verified = Date.now();
 
     // hash password
@@ -157,26 +145,6 @@ async function create(params) {
     return basicDetails(account);
 }
 
-async function update(id, params) {
-    const account = await getDbItemById(id);
-
-    // validate (if email was changed)
-    if (params.email && account.email !== params.email && await db.Account.findOne({ email: params.email })) {
-        throw 'Email "' + params.email + '" is already taken';
-    }
-
-    // hash password if it was entered
-    if (params.password) {
-        params.passwordHash = hash(params.password);
-    }
-
-    // copy params to account and save
-    Object.assign(account, params);
-    account.updated = Date.now();
-    await account.save();
-
-    return basicDetails(account);
-}
 
 async function _delete(id) {
     const account = await getDbItemById(id);
@@ -186,11 +154,13 @@ async function _delete(id) {
 // helper functions
 
 async function getDbItemById(id) {
-    if (!db.isValidId(id)) throw 'Account not found';
-    const account = await db.Account.findById(id);
-    if (!account) throw 'Account not found';
+    if (!db.isValidId(id)) throw 'Warden not found';
+    const account = await db.Warden.findById(id);
+    if (!account) throw 'Warden not found';
     return account;
 }
+
+
 
 async function getRefreshToken(token) {
     const refreshToken = await db.RefreshToken.findOne({ token }).populate('account');
@@ -222,62 +192,7 @@ function randomTokenString() {
 }
 
 function basicDetails(account) {
-    const { id, title, firstName, lastName, email, role, created, updated, isVerified } = account;
-    return { id, title, firstName, lastName, email, role, created, updated, isVerified };
+    const { id, title, name, lastName, email, role, created, updated, isVerified } = account;
+    return { id, title, name, lastName, email, role, created, updated, isVerified };
 }
 
-async function sendVerificationEmail(account, origin) {
-    let message;
-    if (origin) {
-        const verifyUrl = `${origin}/account/verify-email?token=${account.verificationToken}`;
-        message = `<p>Please click the below link to verify your email address:</p>
-                   <p><a href="${verifyUrl}">${verifyUrl}</a></p>`;
-    } else {
-        message = `<p>Please use the below token to verify your email address with the <code>/account/verify-email</code> api route:</p>
-                   <p><code>${account.verificationToken}</code></p>`;
-    }
-
-    await sendEmail({
-        to: account.email,
-        subject: 'Sign-up Verification API - Verify Email',
-        html: `<h4>Verify Email</h4>
-               <p>Thanks for registering!</p>
-               ${message}`
-    });
-}
-
-async function sendAlreadyRegisteredEmail(email, origin) {
-    let message;
-    if (origin) {
-        message = `<p>If you don't know your password please visit the <a href="${origin}/account/forgot-password">forgot password</a> page.</p>`;
-    } else {
-        message = `<p>If you don't know your password you can reset it via the <code>/account/forgot-password</code> api route.</p>`;
-    }
-
-    await sendEmail({
-        to: email,
-        subject: 'Sign-up Verification API - Email Already Registered',
-        html: `<h4>Email Already Registered</h4>
-               <p>Your email <strong>${email}</strong> is already registered.</p>
-               ${message}`
-    });
-}
-
-async function sendPasswordResetEmail(account, origin) {
-    let message;
-    if (origin) {
-        const resetUrl = `${origin}/account/reset-password?token=${account.resetToken.token}`;
-        message = `<p>Please click the below link to reset your password, the link will be valid for 1 day:</p>
-                   <p><a href="${resetUrl}">${resetUrl}</a></p>`;
-    } else {
-        message = `<p>Please use the below token to reset your password with the <code>/account/reset-password</code> api route:</p>
-                   <p><code>${account.resetToken.token}</code></p>`;
-    }
-
-    await sendEmail({
-        to: account.email,
-        subject: 'Sign-up Verification API - Reset Password',
-        html: `<h4>Reset Password Email</h4>
-               ${message}`
-    });
-}
