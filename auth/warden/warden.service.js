@@ -7,9 +7,6 @@ const db = require('_helpers/db');
 const Role = require('_helpers/role');
 
 module.exports = {
-    
-   
-    
     createItem,
     verifyEmail,
     forgotPassword,
@@ -47,7 +44,6 @@ async function createItem(params, origin) {
 async function update(id, params) {
     const account = await getDbItemById(id);
    
-    
     // copy params to account and save
     Object.assign(account, params);
     
@@ -61,9 +57,6 @@ async function _delete(id) {
     const account = await getDbItemById(id);
     await account.remove();
 }
-
-
-
 
 
 async function verifyEmail({ token }) {
@@ -119,6 +112,7 @@ async function resetPassword({ token, password }) {
 
 async function getAll() {
     const accounts = await db.Warden.find();
+    
     return accounts.map(x => basicDetails(x));
 }
 
@@ -192,7 +186,7 @@ function randomTokenString() {
 }
 
 function basicDetails(account) {
-    const { id, title, name, lastName, email, role, created, updated, isVerified } = account;
-    return { id, title, name, lastName, email, role, created, updated, isVerified };
+    const { id, title, expires ,name, lastName, email, role, created, updated, isVerified } = account;
+    return { id, title, expires ,name, lastName, email, role, created, updated, isVerified };
 }
 

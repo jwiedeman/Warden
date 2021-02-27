@@ -22,7 +22,7 @@ function Nav() {
                     <NavLink exact to="/" className="nav-item nav-link">Home</NavLink>
                     <NavLink to="/profile" className="nav-item nav-link">Profile</NavLink>
                     <NavLink to="/tasks" className="nav-item nav-link">Tasks</NavLink>
-                    <NavLink to="/inventory" className="nav-item nav-link">Inventory</NavLink>
+                    <NavLink to="/inventory/items" className="nav-item nav-link">Inventory</NavLink>
                     <NavLink to="/processes" className="nav-item nav-link">Processes</NavLink>
                     <NavLink to="/locations" className="nav-item nav-link">Locations</NavLink>
                     <NavLink to="/warden" className="nav-item nav-link">Warden</NavLink>

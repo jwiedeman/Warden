@@ -34,18 +34,17 @@ router.delete('/:id', authorize(), _delete);
 function inventorySchema(req, res, next) {
     const schema = Joi.object({
         name: Joi.string().required(),
-        acceptTerms: Joi.boolean().valid(true)
+        expires : Joi.boolean().required()
     });
     validateRequest(req, next, schema);
     console.log('inventorySchema')
 }
 
 function createInventory(req, res, next) {
-    console.log('createinventory')
+    console.log('createinventory', req.body)
     wardenService.createItem(req.body, req.get('origin'))
         .then(() => res.json({ message: 'Registration successful, please check your email for verification instructions' }))
         .catch(next);
-        console.log('createInventory2')
 }
 
 
