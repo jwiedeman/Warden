@@ -31,7 +31,7 @@ function List({ match }) {
             <table className="table table-striped">
                 <thead>
                     <tr>
-                        <th style={{ width: '30%' }}>Name</th>
+                        <th style={{ width: '10%' }}>Name</th>
                         <th style={{ width: '30%' }}>Submitted</th>
                         <th style={{ width: '30%' }}>Expires</th>
                         <th style={{ width: '30%' }}>expiration date</th>
@@ -41,11 +41,12 @@ function List({ match }) {
                 <tbody>
                     {inventory && inventory.map(item =>
                         <tr key={item.id}>
-                            <td>{item.name} {item.id} </td>
+                            <td>{item.name} </td>
                             <td>{item.created}</td>
-                            <td>{JSON.stringify(item.expires)}</td>
+                            <td>{JSON.stringify(item.notes)}</td>
                             <td style={{ whiteSpace: 'nowrap' }}>
                                 <Link to={`${path}/edit/${item.id}`} className="btn btn-sm btn-primary mr-1">Edit</Link>
+                                <Link to={`${path}/addentry/${item.id}`} className="btn btn-sm btn-primary mr-1">Add Entry</Link>
                                 <button onClick={() => deleteUser(item.id)} className="btn btn-sm btn-danger" style={{ width: '60px' }} disabled={item.isDeleting}>
                                     {item.isDeleting 
                                         ? <span className="spinner-border spinner-border-sm"></span>

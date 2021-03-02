@@ -25,9 +25,7 @@ module.exports = {
 
 // CRUD
 async function createItem(params, origin) {
-    // validate
     console.log('createItem')
-    // validate
     if (await db.Warden.findOne({ name: params.name })) {
         throw 'Item "' + params.name + '" is already added to the DB';
     }
@@ -35,7 +33,6 @@ async function createItem(params, origin) {
 
     // save account
     await account.save();
-
     return basicDetails(account);
 }
 
@@ -186,7 +183,7 @@ function randomTokenString() {
 }
 
 function basicDetails(account) {
-    const { id, title, expires ,name, lastName, email, role, created, updated, isVerified } = account;
-    return { id, title, expires ,name, lastName, email, role, created, updated, isVerified };
+    const { id,  notes ,name, totalMeasurement, productUrl, entries, created, updated, isVerified } = account;
+    return { id,  notes ,name, totalMeasurement, productUrl, entries, created, updated, isVerified };
 }
 

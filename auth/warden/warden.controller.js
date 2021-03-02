@@ -34,7 +34,10 @@ router.delete('/:id', authorize(), _delete);
 function inventorySchema(req, res, next) {
     const schema = Joi.object({
         name: Joi.string().required(),
-        expires : Joi.boolean().required()
+        notes : Joi.string(),
+        totalMeasurement: Joi.number(),
+        productUrl: Joi.string(),
+        entries : Joi.array()
     });
     validateRequest(req, next, schema);
     console.log('inventorySchema')
@@ -171,8 +174,7 @@ function resetPassword(req, res, next) {
 function getAll(req, res, next) {
     wardenService.getAll()
         .then(accounts => res.json(accounts))
-        .catch(next);
-         
+        .catch(next);      
 }
 
 function getById(req, res, next) {
@@ -212,6 +214,10 @@ function updateSchema(req, res, next) {
     const schemaRules = {
        
         name: Joi.string().empty(''),
+        notes: Joi.string(),
+        totalMeasurement: Joi.number(),
+        productUrl: Joi.string(),
+        entries: Joi.array(),
         
     };
 

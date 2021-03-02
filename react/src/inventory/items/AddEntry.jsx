@@ -5,7 +5,7 @@ import * as Yup from 'yup';
 
 import { wardenService, alertService } from '@/_services';
 
-function AddEdit({ history, match }) {
+function AddEntry({ history, match }) {
     const { id } = match.params;
     const isAddMode = !id;
     
@@ -17,8 +17,21 @@ function AddEdit({ history, match }) {
         productUrl:'',
         entries : [],
         
+        entities: [
+            {
+                id: 'a',
+                text: 'go shopping',
+                
+            },
+            {
+                id: 'b',
+                text: 'learn recursion',
+                
+            },
+        ],
     };
     
+
     const validationSchema = Yup.object().shape({
         name: Yup.string()
             .required('First Name is required'),
@@ -32,15 +45,14 @@ function AddEdit({ history, match }) {
             
     });
 
+  
+
 
 
     function onSubmit(fields, { setStatus, setSubmitting }) {
         setStatus();
-        if (isAddMode) {
-            createUser(fields, setSubmitting);
-        } else {
-            updateUser(id, fields, setSubmitting);
-        }
+        this.setState({entities: this.entities.state.push('member')});
+        setSubmitting(false);
     }
 
     function createUser(fields, setSubmitting) {
@@ -67,11 +79,7 @@ function AddEdit({ history, match }) {
                 alertService.error(error);
             });
     }
-    function onChange(event){
-        var newArray = this.state.arr.slice();    
-        newArray.push("new value");   
-        this.setState({arr:newArray})
-    }
+
 
     return (
         <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={onSubmit}>
@@ -96,25 +104,13 @@ function AddEdit({ history, match }) {
                                 <Field name="name" type="text" className={'form-control' + (errors.name && touched.name ? ' is-invalid' : '')} />
                                 <ErrorMessage name="name" component="div" className="invalid-feedback" />
                             </div>
-                            <div className="form-group col-5">
-                                <label>notes</label>
-                                <Field name="notes" type="text" className={'form-control' + (errors.notes && touched.notes ? ' is-invalid' : '')} />
-                                <ErrorMessage name="notes" component="div" className="invalid-feedback" />
-                            </div>
-                            <div className="form-group col-5">
-                                <label>totalMeasurement</label>
-                                <Field name="totalMeasurement" type="text" className={'form-control' + (errors.totalMeasurement && touched.totalMeasurement ? ' is-invalid' : '')} />
-                                <ErrorMessage name="totalMeasurement" component="div" className="invalid-feedback" />
-                            </div>
-                            <div className="form-group col-5">
-                                <label>productUrl</label>
-                                <Field name="productUrl" type="text" className={'form-control' + (errors.productUrl && touched.productUrl ? ' is-invalid' : '')} />
-                                <ErrorMessage name="productUrl" component="div" className="invalid-feedback" />
-                            </div>
+                       
+
+
                         </div>
                        
-                        
-                        
+                        {JSON.stringify(initialValues.entities)}
+                        <button onClick='onSubmit()'>Submit</button>
                         <div className="form-group">
                             <button type="submit" disabled={isSubmitting} className="btn btn-primary">
                                 {isSubmitting && <span className="spinner-border spinner-border-sm mr-1"></span>}
@@ -131,4 +127,4 @@ function AddEdit({ history, match }) {
     );
 }
 
-export { AddEdit };
+export { AddEntry };

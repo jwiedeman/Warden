@@ -94,9 +94,8 @@ function create(params) {
 
 function update(id, params) {
     return fetchWrapper.put(`${baseWardenUrl}/${id}`, params)
-        .then(user => {
-           
-            return user;
+        .then(data => {
+            return data;
         });
 }
 
